@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <cmath>
 using namespace std;
 
@@ -29,7 +30,8 @@ bool isPrime(int n) {
 
 int mdcEstendido(int a, int b, int &s, int &t) {
     if (b == 0) {
-        s = 1; t = 0;
+        s = 1;
+        t = 0;
         return a;
     }
     int s1, t1;
@@ -39,91 +41,81 @@ int mdcEstendido(int a, int b, int &s, int &t) {
     return mdc;
 }
 
-// Encripta o texto 
+// encriptar texto
 string encriptar(const string &texto, int e, int n) {
-    string textoCriptografado = "";
+    ostringstream oss;
     for (char c : texto) {
-        int caractere = (int)c;
-        if (caractere >= n) {
-            cerr << "Erro: caractere '" << c << "' com valor " << caractere << " é maior que n = " << n << endl;
+        int ascii = static_cast<unsigned char>(c); // Garante que não fique negativo
+        if (ascii >= n) {
+            cerr << "Erro: caractere '" << c << "' com valor ASCII " << ascii
+                 << " é maior ou igual a n = " << n << endl;
             return "";
         }
-        int caractereCriptografado = ExponenciacaoModular(caractere, e, n);
-        textoCriptografado += to_string(caractereCriptografado) + " ";
+        int criptografado = ExponenciacaoModular(ascii, e, n);
+        oss << criptografado << " ";
     }
-    return textoCriptografado;
+    return oss.str();
 }
 
-// Decripta o texto 
+// decriptar texto
 string decriptar(const string &textoCriptografado, int d, int n) {
-    string textoDescriptografado = "";
-    string bloco = "";
-    for (char c : textoCriptografado) {
-        if (c != ' ') {
-            bloco += c;
-        } else {
-            if (!bloco.empty()) {
-                int caractere = stoi(bloco);
-                int m = ExponenciacaoModular(caractere, d, n);
-                textoDescriptografado += (char)m;
-                bloco = "";
-            }
-        }
+    istringstream iss(textoCriptografado);
+    int num;
+    string resultado = "";
+
+    while (iss >> num) {
+        char c = static_cast<char>(ExponenciacaoModular(num, d, n));
+        resultado += c;
     }
-    // Para o último bloco, se houver
-    if (!bloco.empty()) {
-        int caractere = stoi(bloco);
-        int m = ExponenciacaoModular(caractere, d, n);
-        textoDescriptografado += (char)m;
-    }
-    return textoDescriptografado;
+
+    return resultado;
 }
 
 int main() {
     int p, q;
-    cout << "Digite dois numeros primos p e q: " << endl;
+    cout << "Digite dois primos (p e q): ";
     cin >> p >> q;
 
     if (!isPrime(p) || !isPrime(q)) {
-        cout << "Erro: ambos os números devem ser primos!" << endl;
+        cout << "Erro: ambos os números devem ser primos.\n";
         return 1;
     }
 
     int n = p * q;
     int phi = (p - 1) * (q - 1);
 
-    if (n <= 127) {
-        cout << "Erro: n = " << n << " é muito pequeno. Escolha primos maiores." << endl;
+    if (n <= 255) {
+        cout << "Erro: n = " << n << " é muito pequeno. Escolha primos maiores que resultem em n > 255.\n";
         return 1;
     }
 
-    int e;
-    for (e = 2; e < phi; e++) {
-        int s, t;
+    int e = 3, s, t;
+    while (e < phi) {
         if (mdcEstendido(e, phi, s, t) == 1)
             break;
+        e++;
     }
 
-    int s, t;
     mdcEstendido(e, phi, s, t);
     int d = (s % phi + phi) % phi;
 
-    cout << "Valor de n: " << n << endl;
-    cout << "Chave pública (e): " << e << endl;
+    cout << "\nn = " << n << "\n";
+    cout << "Chave pública (e): " << e << endl ;
     cout << "Chave privada (d): " << d << endl;
 
     cin.ignore();
     string texto;
-    cout << endl << "Digite o texto para criptografar: " << endl;
+    cout << "\nDigite o texto para criptografar: ";
     getline(cin, texto);
 
     string textoCriptografado = encriptar(texto, e, n);
-    if (textoCriptografado == "") return 1;
+    if (textoCriptografado.empty()) return 1;
 
-    cout << endl << "Texto criptografado : " << textoCriptografado << endl;
+    cout << "\nTexto criptografado: " << textoCriptografado << endl;
 
-    string textoDescriptografado = decriptar(textoCriptografado, d, n);
-    cout << endl << "Texto descriptografado: " << textoDescriptografado << endl;
+    string textoDecriptado = decriptar(textoCriptografado, d, n);
+    cout << "Texto decriptado: " << textoDecriptado << endl;
 
     return 0;
 }
+
