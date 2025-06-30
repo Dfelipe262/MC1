@@ -2,7 +2,7 @@
 using namespace std;
 
 // Função que verifica se um número é primo
-bool ehPrimo(int num) {
+bool isPrime(int num) {
     if (num <= 1) return false; // números <= 1 não são primos
     for (int i = 2; i < num; i++) {
         if (num % i == 0) return false; // encontrou divisor, não é primo
@@ -10,10 +10,10 @@ bool ehPrimo(int num) {
     return true; // não encontrou divisor, é primo
 }
 
-// Função que imprime todos os primos entre inicio e fim
-void primosNoIntervalo(int inicio, int fim) {
-    for (int i = inicio; i <= fim; i++) {
-        if (ehPrimo(i)) {
+// Função que imprime todos os primos no intervalo dado
+void Range(int start, int end) {
+    for (int i = start; i <= end; i++) {
+        if (isPrime(i)) {
             cout << i << " ";
         }
     }
@@ -21,16 +21,16 @@ void primosNoIntervalo(int inicio, int fim) {
 }
 
 int main() {
-    int inicio, fim;
+    int start, end;
 
     cout << "Digite o início do intervalo: ";
-    cin >> inicio;
+    cin >> start;
 
-    cout << "Digite o fim do intervalo: ";
-    cin >> fim;
+    cout << "Digite o end do intervalo: ";
+    cin >> end;
 
-    cout << "Primos entre " << inicio << " e " << fim << ": ";
-    primosNoIntervalo(inicio, fim);
+    cout << "Primos entre " << start << " e " << end << ": ";
+    Range(start, end);
 
     return 0;
 }
